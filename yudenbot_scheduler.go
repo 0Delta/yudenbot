@@ -11,9 +11,9 @@ import (
 )
 
 type Executor struct {
-	name    string
-	fnc     func(context.Context) error
-	tick    time.Duration
+	Name    string
+	Fnc     func(context.Context) error
+	Tick    time.Duration
 	_ticker *time.Ticker
 }
 
@@ -31,7 +31,7 @@ func Schedule(ctx context.Context, execList []Executor) (err error) {
 	chStop := make(chan int, 1)
 	go func(stopTimer chan int, ctx context.Context) {
 		for n := range execList {
-			execList[n]._ticker = time.NewTicker(execList[n].tick)
+			execList[n]._ticker = time.NewTicker(execList[n].Tick)
 			defer execList[n]._ticker.Stop()
 		}
 
@@ -43,8 +43,8 @@ func Schedule(ctx context.Context, execList []Executor) (err error) {
 			for _, e := range execList {
 				select {
 				case <-e._ticker.C:
-					log.Println("tick : ", e.name)
-					go e.fnc(ctx)
+					log.Println("tick : ", e.Name)
+					go e.Fnc(ctx)
 				case <-stopTimer:
 					log.Println("Timer stop.")
 					break LOOP

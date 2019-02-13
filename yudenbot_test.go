@@ -22,14 +22,14 @@ func TestYudenbot(t *testing.T) {
 			args: args{
 				execList: []Executor{
 					Executor{
-						name: "fizz",
-						fnc:  func(ctx context.Context) (err error) { log.Println("fizz"); return nil },
-						tick: 3 * time.Second,
+						Name: "fizz",
+						Fnc:  func(ctx context.Context) (err error) { log.Println("fizz"); return nil },
+						Tick: 3 * time.Second,
 					},
 					Executor{
-						name: "buzz",
-						fnc:  func(ctx context.Context) (err error) { log.Println("buzz"); return nil },
-						tick: 5 * time.Second,
+						Name: "buzz",
+						Fnc:  func(ctx context.Context) (err error) { log.Println("buzz"); return nil },
+						Tick: 5 * time.Second,
 					},
 				},
 			},
