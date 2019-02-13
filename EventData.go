@@ -14,7 +14,7 @@ type rawEventDatas struct {
 
 type rawEventData struct {
 	ID           int         `json:"id"`
-	URL          string      `json:"gloal_id"`
+	URL          string      `json:"global_id"`
 	Title        string      `json:"title"`
 	Description  string      `json:"description"`
 	StartDateStr string      `json:"start_date"`
@@ -77,6 +77,7 @@ func GetEventDatas(jsonBytes []byte) (datas []EventData, err error) {
 		}
 		datas = append(datas, d)
 	}
+	log.Println(datas)
 	return
 }
 
@@ -106,6 +107,5 @@ func parseEventData(rawdata *rawEventData) (data EventData, err error) {
 	} else {
 		data.Organizer = rawdata.Organizer[0].Organizer
 	}
-
 	return
 }

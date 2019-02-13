@@ -42,7 +42,7 @@ func TestYudenbot(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			ctx, cancel := context.WithCancel(context.TODO())
 			tt.args.ctx = ctx
-			go Yudenbot(tt.args.ctx, tt.args.execList)
+			go YudenBot(tt.args.ctx, tt.args.execList)
 			time.Sleep(25 * time.Second)
 			cancel()
 		})
