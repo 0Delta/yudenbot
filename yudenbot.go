@@ -16,17 +16,10 @@ package yudenbot
 
 import (
 	"context"
-	"io/ioutil"
 	"log"
 )
 
-type ctxkey int
-
-const (
-	config ctxkey = iota
-)
-
-func Yudenbot(execList []Executor) {
+func Yudenbot(ctx context.Context, execList []Executor) {
 	log.Print("run Yuden-Bot")
 
 	// updater
@@ -39,12 +32,6 @@ func Yudenbot(execList []Executor) {
 	// 時刻チェック
 	// execute()
 	// 1分毎
-	buf, err := ioutil.ReadFile("./.config.yml")
-	if err != nil {
-		log.Fatal("Error while load config : ", err)
-	}
-
-	ctx := context.WithValue(context.TODO(), config, buf)
 	Schedule(ctx, execList)
 	log.Println("Yuden-Bot End.")
 }
