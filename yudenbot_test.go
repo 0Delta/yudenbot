@@ -1,6 +1,6 @@
 // yuden
 
-package yudenbot
+package main
 
 import (
 	"context"

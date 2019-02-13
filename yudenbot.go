@@ -10,7 +10,7 @@ More information
 
 https://wp.infra-workshop.tech/ (Japanese/日本語)
 */
-package yudenbot
+package main
 
 // とりあえずローカルで動くように
 

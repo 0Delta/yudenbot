@@ -1,4 +1,4 @@
-package yudenbot
+package main
 
 import (
 	"io/ioutil"

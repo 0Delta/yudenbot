@@ -1,4 +1,4 @@
-package yudenbot
+package main
 
 import (
 	"crypto/md5"

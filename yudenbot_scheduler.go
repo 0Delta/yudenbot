@@ -1,5 +1,5 @@
 //yudengo_scheduler
-package yudenbot
+package main
 
 import (
 	"context"
