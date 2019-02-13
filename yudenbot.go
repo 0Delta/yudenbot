@@ -16,19 +16,15 @@ package yudenbot
 
 import (
 	"context"
+	"io/ioutil"
 	"log"
-	"os"
-	"os/signal"
-	"syscall"
-	"time"
 )
 
-type Executor struct {
-	name    string
-	fnc     func(context.Context) error
-	tick    time.Duration
-	_ticker *time.Ticker
-}
+type ctxkey int
+
+const (
+	config ctxkey = iota
+)
 
 func Yudenbot(execList []Executor) {
 	log.Print("run Yuden-Bot")
@@ -43,49 +39,13 @@ func Yudenbot(execList []Executor) {
 	// 時刻チェック
 	// execute()
 	// 1分毎
-	signalCh := make(chan os.Signal)
-	signal.Notify(signalCh,
-		syscall.SIGHUP,
-		syscall.SIGTERM,
-		syscall.SIGKILL,
-		syscall.SIGINT,
-	)
+	buf, err := ioutil.ReadFile("./.config.yml")
+	if err != nil {
+		log.Fatal("Error while load config : ", err)
+	}
 
-	chStop := make(chan int, 1)
-	go func(stopTimer chan int) {
-		for n := range execList {
-			execList[n]._ticker = time.NewTicker(execList[n].tick)
-			defer execList[n]._ticker.Stop()
-		}
-
-		masterTick := time.NewTicker(1 * time.Second)
-		defer masterTick.Stop()
-
-		var ctx context.Context
-	LOOP:
-		for {
-			for _, e := range execList {
-				select {
-				case <-e._ticker.C:
-					log.Println("tick : ", e.name)
-					go e.fnc(ctx)
-				case <-stopTimer:
-					log.Println("Timer stop.")
-					break LOOP
-				case <-masterTick.C:
-					continue
-				}
-			}
-		}
-		log.Println("timerfunc end.")
-	}(chStop)
-
-	sigCh := <-signalCh
-	// catch os signal
-	log.Println("!! catch signal !! : ", sigCh)
-
-	chStop <- 0 // stop ticker
-	close(chStop)
+	ctx := context.WithValue(context.TODO(), config, buf)
+	Schedule(ctx, execList)
 	log.Println("Yuden-Bot End.")
 }
 
