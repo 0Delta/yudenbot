@@ -11,6 +11,7 @@ import (
 
 func TestYudenbot(t *testing.T) {
 	type args struct {
+		ctx      context.Context
 		execList []Executor
 	}
 	tests := []struct {
@@ -20,6 +21,7 @@ func TestYudenbot(t *testing.T) {
 		{
 			name: "bot test",
 			args: args{
+				ctx: context.TODO(),
 				execList: []Executor{
 					Executor{
 						Name: "fizz",
@@ -38,7 +40,7 @@ func TestYudenbot(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			Yudenbot(tt.args.execList)
+			Yudenbot(tt.args.ctx, tt.args.execList)
 		})
 	}
 }
