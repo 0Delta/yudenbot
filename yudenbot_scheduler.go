@@ -33,6 +33,7 @@ func Schedule(ctx context.Context, execList []Executor) (err error) {
 		for n := range execList {
 			execList[n]._ticker = time.NewTicker(execList[n].Tick)
 			defer execList[n]._ticker.Stop()
+			go execList[n].Fnc(ctx)
 		}
 
 		masterTick := time.NewTicker(1 * time.Second)
@@ -43,7 +44,7 @@ func Schedule(ctx context.Context, execList []Executor) (err error) {
 			for _, e := range execList {
 				select {
 				case <-e._ticker.C:
-					log.Println("tick : ", e.Name)
+					log.Println("exec : ", e.Name)
 					go e.Fnc(ctx)
 				case <-stopTimer:
 					log.Println("Timer stop.")
