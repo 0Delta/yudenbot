@@ -14,6 +14,7 @@ func TestYudenbot(t *testing.T) {
 		ctx      context.Context
 		execList []Executor
 	}
+	ctx, cancel := context.WithCancel(context.TODO())
 	tests := []struct {
 		name string
 		args args
@@ -21,7 +22,7 @@ func TestYudenbot(t *testing.T) {
 		{
 			name: "bot test",
 			args: args{
-				ctx: context.TODO(),
+				ctx: ctx,
 				execList: []Executor{
 					Executor{
 						Name: "fizz",
@@ -40,7 +41,9 @@ func TestYudenbot(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			Yudenbot(tt.args.ctx, tt.args.execList)
+			go Yudenbot(tt.args.ctx, tt.args.execList)
+			time.Sleep(25 * time.Second)
+			cancel()
 		})
 	}
 }
