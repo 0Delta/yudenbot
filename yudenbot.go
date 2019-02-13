@@ -55,6 +55,7 @@ func _main(ctx context.Context) (string, error) {
 		log.Fatal("Error while load config : ", err)
 	}
 	ctx = context.WithValue(ctx, config, buf)
+	fetchtime := time.Now()
 
 	YudenBot(ctx, []Executor{
 		Executor{
@@ -70,12 +71,13 @@ func _main(ctx context.Context) (string, error) {
 			Name: "fetcher",
 			Fnc: func(ctx context.Context) (err error) {
 				for _, e := range events {
-					t := time.Now().Sub(e.StartDate)
-					if 0 < t && t < time.Minute {
+					t := time.Now()
+					if fetchtime.After(e.StartDate) && t.Before(e.StartDate) {
 						msg := "-- This is test post --\n" + e.Title + "\n" + e.URL + "\n#インフラ勉強会"
 						log.Println("post tweet : \n" + msg)
 						// tweet(msg, getToken())
 					}
+					fetchtime = t
 				}
 				return nil
 			},
