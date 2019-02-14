@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"strings"
 	"time"
 
 	yaml "gopkg.in/yaml.v2"
@@ -35,6 +36,7 @@ func main() {
 }
 
 var events []EventData
+var jst, _ = time.LoadLocation("Asia/Tokyo")
 
 func getToken() *TwitterAuth {
 	buf, err := ioutil.ReadFile("./.token.yml")
@@ -84,9 +86,15 @@ func _main(ctx context.Context) (string, error) {
 						log.Println("post tweet : \n" + msg)
 						tweet(msg, getToken())
 					}
-					d = e.StartDate.Add(-9 * time.Hour)
+					d = time.Now()
+					d = time.Date(d.Year(), d.Month(), d.Day(), 9, 0, 0, 0, jst)
 					if fetchtime.Before(d) && t.After(d) {
-						msg := "-- This is test post --\nテストだよ！！\n" + e.Title + "\n" + e.URL + "\n#インフラ勉強会"
+						msg := strings.Join([]string{
+							"今日(", t.In(jst).Format("01/02"), ")の #インフラ勉強会 は...\n",
+							e.Title, "\n",
+							e.StartDate.In(jst).Format("15:04"), " - ", e.EndDate.In(jst).Format("15:04"), "\n",
+							e.URL,
+						}, "")
 						log.Println("post tweet : \n" + msg)
 						tweet(msg, getToken())
 					}
