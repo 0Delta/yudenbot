@@ -84,7 +84,7 @@ func _main(ctx context.Context) (string, error) {
 						log.Println("post tweet : \n" + msg)
 						// tweet(msg, getToken())
 					}
-					d = e.StartDate.Add(-9 * time.Hour).Add(-16 * time.Minute)
+					d = e.StartDate.Add(-9 * time.Hour)
 					if fetchtime.Before(d) && t.After(d) {
 						msg := "-- This is test post --\nテストだよ！！\n" + e.Title + "\n" + e.URL + "\n#インフラ勉強会"
 						log.Println("post tweet : \n" + msg)
