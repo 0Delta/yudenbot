@@ -76,19 +76,19 @@ func _main(ctx context.Context) (string, error) {
 					if fetchtime.Before(d) && t.After(d) {
 						msg := "-- This is test post --\nはじまるよ！\n" + e.Title + "\n" + e.URL + "\n#インフラ勉強会"
 						log.Println("post tweet : \n" + msg)
-						// tweet(msg, getToken())
+						tweet(msg, getToken())
 					}
 					d = e.StartDate.Add(-30 * time.Minute)
 					if fetchtime.Before(d) && t.After(d) {
 						msg := "-- This is test post --\nもうすぐ始まるよ！\n" + e.Title + "\n" + e.URL + "\n#インフラ勉強会"
 						log.Println("post tweet : \n" + msg)
-						// tweet(msg, getToken())
+						tweet(msg, getToken())
 					}
 					d = e.StartDate.Add(-9 * time.Hour)
 					if fetchtime.Before(d) && t.After(d) {
 						msg := "-- This is test post --\nテストだよ！！\n" + e.Title + "\n" + e.URL + "\n#インフラ勉強会"
 						log.Println("post tweet : \n" + msg)
-						// tweet(msg, getToken())
+						tweet(msg, getToken())
 					}
 					fetchtime = t
 				}
