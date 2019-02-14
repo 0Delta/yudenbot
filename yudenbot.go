@@ -72,8 +72,21 @@ func _main(ctx context.Context) (string, error) {
 			Fnc: func(ctx context.Context) (err error) {
 				for _, e := range events {
 					t := time.Now()
-					if fetchtime.After(e.StartDate) && t.Before(e.StartDate) {
-						msg := "-- This is test post --\n" + e.Title + "\n" + e.URL + "\n#インフラ勉強会"
+					d := e.StartDate
+					if fetchtime.Before(d) && t.After(d) {
+						msg := "-- This is test post --\nはじまるよ！\n" + e.Title + "\n" + e.URL + "\n#インフラ勉強会"
+						log.Println("post tweet : \n" + msg)
+						// tweet(msg, getToken())
+					}
+					d = e.StartDate.Add(-30 * time.Minute)
+					if fetchtime.Before(d) && t.After(d) {
+						msg := "-- This is test post --\nもうすぐ始まるよ！\n" + e.Title + "\n" + e.URL + "\n#インフラ勉強会"
+						log.Println("post tweet : \n" + msg)
+						// tweet(msg, getToken())
+					}
+					d = e.StartDate.Add(-9 * time.Hour).Add(-16 * time.Minute)
+					if fetchtime.Before(d) && t.After(d) {
+						msg := "-- This is test post --\nテストだよ！！\n" + e.Title + "\n" + e.URL + "\n#インフラ勉強会"
 						log.Println("post tweet : \n" + msg)
 						// tweet(msg, getToken())
 					}

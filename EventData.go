@@ -17,8 +17,8 @@ type rawEventData struct {
 	URL          string      `json:"global_id"`
 	Title        string      `json:"title"`
 	Description  string      `json:"description"`
-	StartDateStr string      `json:"start_date"`
-	EndDateStr   string      `json:"end_date"`
+	StartDateStr string      `json:"utc_start_date"`
+	EndDateStr   string      `json:"utc_end_date"`
 	Organizer    []organizer `json:"organizer"`
 }
 
