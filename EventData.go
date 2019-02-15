@@ -40,10 +40,11 @@ type EventData struct {
 	Organizer   string
 }
 
-func GetEventsFromWordpress(url string) (events []EventData, err error) {
+func GetEventsFromWordpress(url string,dayLineHour int) (events []EventData, err error) {
 	nowt := time.Now()
+	nowt = time.Date(nowt.Year(), nowt.Month(), nowt.Day(), dayLineHour, 0, 0, 0, jst)
 	sdt := nowt.Format("2006/01/02T15:04")
-	edt := nowt.Add(24 * time.Hour).Add(1 * time.Minute).Format("2006/01/02T15:04")
+	edt := nowt.Add(2 * 24 * time.Hour).Add(1 * time.Minute).Format("2006/01/02T15:04")
 	url = "https://" + url + "/?rest_route=/tribe/events/v1/events" + "&start_date=" + sdt + "&end_date=" + edt
 	log.Println("Getting URL : ", url)
 

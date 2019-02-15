@@ -67,7 +67,8 @@ func TestGetEventData(t *testing.T) {
 
 func TestGetEventsFromWordpress(t *testing.T) {
 	type args struct {
-		url string
+		url         string
+		dayLineHour int
 	}
 	tests := []struct {
 		name       string
@@ -78,7 +79,7 @@ func TestGetEventsFromWordpress(t *testing.T) {
 		{
 			name: "test1",
 			args: args{
-				"wp.infra-workshop.tech",
+				"wp.infra-workshop.tech", 4,
 			},
 			wantEvents: []EventData{{
 				ID:          5212,
@@ -91,7 +92,7 @@ func TestGetEventsFromWordpress(t *testing.T) {
 		{
 			name: "test2 cache-test",
 			args: args{
-				"wp.infra-workshop.tech",
+				"wp.infra-workshop.tech", 4,
 			},
 			wantEvents: []EventData{{
 				ID:          5212,
@@ -105,8 +106,8 @@ func TestGetEventsFromWordpress(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := GetEventsFromWordpress(tt.args.url)
-			// gotEvents, err := GetEventsFromWordpress(tt.args.url)
+			_, err := GetEventsFromWordpress(tt.args.url, tt.args.dayLineHour)
+			// gotEvents, err := GetEventsFromWordpress(tt.args.url, tt.args.dayLineHour)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetEventsFromWordpress() error = %v, wantErr %v", err, tt.wantErr)
 				return

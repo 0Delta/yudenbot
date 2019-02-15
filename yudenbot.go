@@ -38,6 +38,27 @@ func main() {
 var events []EventData
 var jst, _ = time.LoadLocation("Asia/Tokyo")
 
+type configArgs struct {
+	WordpressURL    string `yaml:wordpressurl`
+	DayLine         int    `yaml:dayline`
+	SummaryPostHour int    `yaml:summaryposthour`
+}
+
+func GetConfig(ctx context.Context) (args *configArgs, err error) {
+	v := ctx.Value(config)
+	buf, ok := v.([]byte)
+	if !ok {
+		log.Fatal("Error while load token : ", fmt.Errorf("token not found"))
+		return nil, err
+	}
+	err = yaml.Unmarshal(buf, &args)
+	if err != nil {
+		log.Fatal("Error while unmarshal token: ", err)
+		return nil, err
+	}
+	return args, nil
+}
+
 func getToken() *TwitterAuth {
 	buf, err := ioutil.ReadFile("./.token.yml")
 	if err != nil {
@@ -63,7 +84,11 @@ func _main(ctx context.Context) (string, error) {
 		Executor{
 			Name: "updater",
 			Fnc: func(ctx context.Context) (err error) {
-				events, err = GetEventsFromWordpress("wp.infra-workshop.tech")
+				conf, err := GetConfig(ctx)
+				if err != nil {
+					return err
+				}
+				events, err = GetEventsFromWordpress(conf.WordpressURL, conf.DayLine)
 				return err
 			},
 			Tick: 30 * time.Minute,
@@ -72,17 +97,21 @@ func _main(ctx context.Context) (string, error) {
 		Executor{
 			Name: "fetcher",
 			Fnc: func(ctx context.Context) (err error) {
+				conf, err := GetConfig(ctx)
+				if err != nil {
+					return err
+				}
 				for _, e := range events {
 					t := time.Now()
 					d := e.StartDate
 					if fetchtime.Before(d) && t.After(d) {
 						msg := strings.Join([]string{
 							"-- This is test post --\n",
-							"はじまるよ！","\n",
-							e.Title,"\n",
-							e.URL,"\n",
+							"はじまるよ！", "\n",
+							e.Title, "\n",
+							e.URL, "\n",
 							"#インフラ勉強会",
-						},"")
+						}, "")
 						log.Println("post tweet : \n" + msg)
 						tweet(msg, getToken())
 					}
@@ -90,16 +119,17 @@ func _main(ctx context.Context) (string, error) {
 					if fetchtime.Before(d) && t.After(d) {
 						msg := strings.Join([]string{
 							"-- This is test post --\n",
-							"もうすぐ始まるよ！\n",e.Title,"\n",
-							e.URL,"\n",
+							"もうすぐ始まるよ！\n", e.Title, "\n",
+							e.URL, "\n",
 							"#インフラ勉強会",
-						},"")
+						}, "")
 						log.Println("post tweet : \n" + msg)
 						tweet(msg, getToken())
 					}
 					d = time.Now()
-					d = time.Date(d.Year(), d.Month(), d.Day(), 9, 0, 0, 0, jst)
-					if fetchtime.Before(d) && t.After(d) {
+					d = time.Date(d.Year(), d.Month(), d.Day(), conf.SummaryPostHour, 0, 0, 0, jst)
+					dayLine := time.Date(d.Year(), d.Month(), d.Day(), conf.DayLine, 0, 0, 0, jst).Add(24 * time.Hour)
+					if fetchtime.Before(d) && t.After(d) && e.StartDate.Before(dayLine) {
 						msg := strings.Join([]string{
 							"-- This is test post --\n",
 							"今日(", t.In(jst).Format("01/02"), ")の #インフラ勉強会 は...\n",
