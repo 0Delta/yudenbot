@@ -1,10 +1,13 @@
 package main
 
 import (
+	"crypto/md5"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"reflect"
 	"time"
 )
 
@@ -61,6 +64,8 @@ func GetEventsFromWordpress(url string) (events []EventData, err error) {
 	return GetEventDatas(byteArray)
 }
 
+var eventsHash []byte
+
 func GetEventDatas(jsonBytes []byte) (datas []EventData, err error) {
 	rawdatas := new(rawEventDatas)
 	err = json.Unmarshal(jsonBytes, rawdatas)
@@ -77,7 +82,14 @@ func GetEventDatas(jsonBytes []byte) (datas []EventData, err error) {
 		}
 		datas = append(datas, d)
 	}
-	log.Println(datas)
+	str := fmt.Sprintf("%v", datas)
+	s := md5.New()
+	hash := s.Sum([]byte(str))
+
+	if reflect.DeepEqual(eventsHash, hash) == false {
+		log.Println("Update Events : ", datas)
+		eventsHash = hash
+	}
 	return
 }
 
