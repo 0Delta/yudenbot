@@ -3,7 +3,6 @@ package main
 import (
 	"crypto/md5"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -65,8 +64,16 @@ func GetEventsFromWordpress(url string) (events []EventData, err error) {
 }
 
 var eventsHash []byte
+var datasCache []EventData
 
 func GetEventDatas(jsonBytes []byte) (datas []EventData, err error) {
+	s := md5.New()
+	hash := s.Sum(jsonBytes)
+	if eventsHash != nil && reflect.DeepEqual(eventsHash, hash) == true {
+		log.Println("GetEventDatas return cache")
+		return datasCache, nil
+	}
+
 	rawdatas := new(rawEventDatas)
 	err = json.Unmarshal(jsonBytes, rawdatas)
 	if err != nil {
@@ -82,15 +89,10 @@ func GetEventDatas(jsonBytes []byte) (datas []EventData, err error) {
 		}
 		datas = append(datas, d)
 	}
-	str := fmt.Sprintf("%v", datas)
-	s := md5.New()
-	hash := s.Sum([]byte(str))
-
-	if reflect.DeepEqual(eventsHash, hash) == false {
-		log.Println("Update Events : ", datas)
-		eventsHash = hash
-	}
-	return
+	log.Println("Update Events : ", datas)
+	eventsHash = hash
+	datasCache = datas
+	return datasCache, nil
 }
 
 func GetEventData(jsonBytes []byte) (data EventData, err error) {
