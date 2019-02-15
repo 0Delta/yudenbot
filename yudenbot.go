@@ -76,13 +76,24 @@ func _main(ctx context.Context) (string, error) {
 					t := time.Now()
 					d := e.StartDate
 					if fetchtime.Before(d) && t.After(d) {
-						msg := "-- This is test post --\nはじまるよ！\n" + e.Title + "\n" + e.URL + "\n#インフラ勉強会"
+						msg := strings.Join([]string{
+							"-- This is test post --\n",
+							"はじまるよ！","\n",
+							e.Title,"\n",
+							e.URL,"\n",
+							"#インフラ勉強会",
+						},"")
 						log.Println("post tweet : \n" + msg)
 						tweet(msg, getToken())
 					}
 					d = e.StartDate.Add(-30 * time.Minute)
 					if fetchtime.Before(d) && t.After(d) {
-						msg := "-- This is test post --\nもうすぐ始まるよ！\n" + e.Title + "\n" + e.URL + "\n#インフラ勉強会"
+						msg := strings.Join([]string{
+							"-- This is test post --\n",
+							"もうすぐ始まるよ！\n",e.Title,"\n",
+							e.URL,"\n",
+							"#インフラ勉強会",
+						},"")
 						log.Println("post tweet : \n" + msg)
 						tweet(msg, getToken())
 					}
@@ -90,6 +101,7 @@ func _main(ctx context.Context) (string, error) {
 					d = time.Date(d.Year(), d.Month(), d.Day(), 9, 0, 0, 0, jst)
 					if fetchtime.Before(d) && t.After(d) {
 						msg := strings.Join([]string{
+							"-- This is test post --\n",
 							"今日(", t.In(jst).Format("01/02"), ")の #インフラ勉強会 は...\n",
 							e.Title, "\n",
 							e.StartDate.In(jst).Format("15:04"), " - ", e.EndDate.In(jst).Format("15:04"), "\n",
