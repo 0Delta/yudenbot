@@ -129,7 +129,7 @@ func _main(ctx context.Context) (string, error) {
 					d = time.Now()
 					d = time.Date(d.Year(), d.Month(), d.Day(), conf.SummaryPostHour, 0, 0, 0, jst)
 					dayLine := time.Date(d.Year(), d.Month(), d.Day(), conf.DayLine, 0, 0, 0, jst).Add(24 * time.Hour)
-					if fetchtime.Before(d) && t.After(d) && e.StartDate.Before(dayLine) {
+					if fetchtime.Before(d) && fetchtime.Equal(d) && t.After(d) && e.StartDate.Before(dayLine) {
 						msg := strings.Join([]string{
 							"-- This is test post --\n",
 							"今日(", t.In(jst).Format("01/02"), ")の #インフラ勉強会 は...\n",
