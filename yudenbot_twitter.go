@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"reflect"
+	"time"
 
 	"github.com/ChimeraCoder/anaconda"
 )
@@ -52,4 +53,42 @@ func tweet(message string, auth *TwitterAuth) (err error) {
 	log.Println("tweet success")
 	log.Println(tweet.Text)
 	return nil
+}
+
+// Schedule
+type tweetSchedule struct {
+	Event    EventData
+	Time     time.Time
+	Message  string
+	Executed bool
+	Hash     []byte
+}
+type tweetSchedules []tweetSchedule
+
+var hasher = md5.New()
+
+func (s *tweetSchedules) append(e EventData, t time.Time, msg string) {
+	h := hasher.Sum([]byte(fmt.Sprintf("%v%v", e, t)))
+	if !s.already(h) {
+		*s = append(*s,
+			tweetSchedule{
+				Event:    e,
+				Time:     t,
+				Message:  msg,
+				Executed: false,
+				Hash:     h,
+			})
+		log.Printf("Schedule append : %v\n%v\n", t.In(jst), msg)
+	}
+}
+
+func (s *tweetSchedules) already(hash []byte) bool {
+	for _, t := range *s {
+		if reflect.DeepEqual(t.Hash, hash) {
+			return true
+		} else {
+			continue
+		}
+	}
+	return false
 }

@@ -37,10 +37,12 @@ func main() {
 
 var events []EventData
 var jst, _ = time.LoadLocation("Asia/Tokyo")
+var twischedules tweetSchedules
 
 type configArgs struct {
 	WordpressURL    string `yaml:wordpressurl`
 	DayLine         int    `yaml:dayline`
+	NextPreviewHour int    `yaml:nextpreviewhour`
 	SummaryPostHour int    `yaml:summaryposthour`
 }
 
@@ -72,13 +74,14 @@ func getToken() *TwitterAuth {
 	return &auth
 }
 
+var fetchtime time.Time
+
 func _main(ctx context.Context) (string, error) {
 	buf, err := ioutil.ReadFile("./.config.yml")
 	if err != nil {
 		log.Fatal("Error while load config : ", err)
 	}
 	ctx = context.WithValue(ctx, config, buf)
-	fetchtime := time.Now()
 
 	YudenBot(ctx, []Executor{
 		Executor{
@@ -89,6 +92,71 @@ func _main(ctx context.Context) (string, error) {
 					return err
 				}
 				events, err = GetEventsFromWordpress(conf.WordpressURL, conf.DayLine)
+				if err != nil {
+					return err
+				}
+				// update tweetSchedule
+				d := time.Now()
+				dayLine := time.Date(d.Year(), d.Month(), d.Day(), conf.DayLine, 0, 0, 0, jst).Add(24 * time.Hour)
+				nextPostHour := time.Date(d.Year(), d.Month(), d.Day(), conf.SummaryPostHour, 0, 0, 0, jst)
+				for _, e := range events {
+					if e.EndDate.After(nextPostHour) && e.StartDate.Before(dayLine) {
+						nextPostHour = e.EndDate
+					}
+				}
+				var s tweetSchedules
+				for _, e := range events {
+					// // start
+					// s.append(e,
+					// 	e.StartDate,
+					// 	strings.Join([]string{
+					// 		"-- This is test post --\n",
+					// 		"はじまるよ！", "\n",
+					// 		e.Title, "\n",
+					// 		e.URL, "\n",
+					// 		"#インフラ勉強会",
+					// 	}, ""),
+					// )
+					// // remind
+					// s.append(e,
+					// 	e.StartDate.Add(-30*time.Minute),
+					// 	strings.Join([]string{
+					// 		"-- This is test post --\n",
+					// 		"もうすぐ始まるよ！\n", e.Title, "\n",
+					// 		e.URL, "\n",
+					// 		"#インフラ勉強会",
+					// 	}, ""),
+					// )
+					// today's summary
+					d = time.Now()
+					if e.StartDate.Before(dayLine) {
+						s.append(e,
+							time.Date(d.Year(), d.Month(), d.Day(), conf.SummaryPostHour, 0, 0, 0, jst),
+							strings.Join([]string{
+								"-- This is test post --\n",
+								"今日(", d.In(jst).Format("01/02"), ")の #インフラ勉強会 は...\n",
+								e.Title, "\n",
+								e.StartDate.In(jst).Format("15:04"), " - ", e.EndDate.In(jst).Format("15:04"), "\n",
+								e.URL,
+							}, ""),
+						)
+					}
+					// next
+					d = d.Add(24 * time.Hour)
+					if e.StartDate.After(dayLine) && e.StartDate.Before(dayLine.Add(24*time.Hour)) {
+						s.append(e,
+							nextPostHour,
+							strings.Join([]string{
+								"-- This is test post --\n",
+								"#インフラ勉強会 、次回", d.In(jst).Format("01/02"), "は...\n",
+								e.Title, "\n",
+								e.StartDate.In(jst).Format("15:04"), " - ", e.EndDate.In(jst).Format("15:04"), "\n",
+								e.URL,
+							}, ""),
+						)
+					}
+				}
+				twischedules = s
 				return err
 			},
 			Tick: 30 * time.Minute,
@@ -97,51 +165,20 @@ func _main(ctx context.Context) (string, error) {
 		Executor{
 			Name: "fetcher",
 			Fnc: func(ctx context.Context) (err error) {
-				conf, err := GetConfig(ctx)
+				_, err = GetConfig(ctx)
 				if err != nil {
 					return err
 				}
-				for _, e := range events {
-					t := time.Now()
-					d := e.StartDate
-					if fetchtime.Before(d) && t.After(d) {
-						msg := strings.Join([]string{
-							"-- This is test post --\n",
-							"はじまるよ！", "\n",
-							e.Title, "\n",
-							e.URL, "\n",
-							"#インフラ勉強会",
-						}, "")
-						log.Println("post tweet : \n" + msg)
-						tweet(msg, getToken())
+				now := time.Now()
+				auth := getToken()
+				for _, t := range twischedules {
+					if t.Time.After(fetchtime) && t.Time.Before(now) && !t.Executed {
+						log.Printf("tweet : %v", t.Message)
+						tweet(t.Message, auth)
+						t.Executed = true
 					}
-					d = e.StartDate.Add(-30 * time.Minute)
-					if fetchtime.Before(d) && t.After(d) {
-						msg := strings.Join([]string{
-							"-- This is test post --\n",
-							"もうすぐ始まるよ！\n", e.Title, "\n",
-							e.URL, "\n",
-							"#インフラ勉強会",
-						}, "")
-						log.Println("post tweet : \n" + msg)
-						tweet(msg, getToken())
-					}
-					d = time.Now()
-					d = time.Date(d.Year(), d.Month(), d.Day(), conf.SummaryPostHour, 0, 0, 0, jst)
-					dayLine := time.Date(d.Year(), d.Month(), d.Day(), conf.DayLine, 0, 0, 0, jst).Add(24 * time.Hour)
-					if fetchtime.Before(d) && fetchtime.Equal(d) && t.After(d) && e.StartDate.Before(dayLine) {
-						msg := strings.Join([]string{
-							"-- This is test post --\n",
-							"今日(", t.In(jst).Format("01/02"), ")の #インフラ勉強会 は...\n",
-							e.Title, "\n",
-							e.StartDate.In(jst).Format("15:04"), " - ", e.EndDate.In(jst).Format("15:04"), "\n",
-							e.URL,
-						}, "")
-						log.Println("post tweet : \n" + msg)
-						tweet(msg, getToken())
-					}
-					fetchtime = t
 				}
+				fetchtime = now
 				return nil
 			},
 			Tick: 1 * time.Minute,
