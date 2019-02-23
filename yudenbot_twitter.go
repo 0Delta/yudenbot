@@ -79,6 +79,8 @@ func (s *tweetSchedules) append(e EventData, t time.Time, msg string) {
 				Hash:     h,
 			})
 		log.Printf("Schedule append : %v\n%v\n", t.In(jst), msg)
+	} else {
+		log.Printf("Schedule append skip : %v\n%v\n", t.In(jst), msg)
 	}
 }
 
@@ -86,9 +88,8 @@ func (s *tweetSchedules) already(hash []byte) bool {
 	for _, t := range *s {
 		if reflect.DeepEqual(t.Hash, hash) {
 			return true
-		} else {
-			continue
 		}
+		continue
 	}
 	return false
 }
