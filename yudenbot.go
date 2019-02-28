@@ -106,34 +106,31 @@ func _main(ctx context.Context) (string, error) {
 				}
 				var s tweetSchedules
 				for _, e := range events {
-					// // start
-					// s.append(e,
-					// 	e.StartDate,
-					// 	strings.Join([]string{
-					// 		"-- This is test post --\n",
-					// 		"はじまるよ！", "\n",
-					// 		e.Title, "\n",
-					// 		e.URL, "\n",
-					// 		"#インフラ勉強会",
-					// 	}, ""),
-					// )
-					// // remind
-					// s.append(e,
-					// 	e.StartDate.Add(-30*time.Minute),
-					// 	strings.Join([]string{
-					// 		"-- This is test post --\n",
-					// 		"もうすぐ始まるよ！\n", e.Title, "\n",
-					// 		e.URL, "\n",
-					// 		"#インフラ勉強会",
-					// 	}, ""),
-					// )
+					// start
+					s.append(e,
+						e.StartDate,
+						strings.Join([]string{
+							"はじまるよ！", "\n",
+							e.Title, "\n",
+							e.URL, "\n",
+							"#インフラ勉強会",
+						}, ""),
+					)
+					// remind
+					s.append(e,
+						e.StartDate.Add(-30*time.Minute),
+						strings.Join([]string{
+							"もうすぐ始まるよ！\n", e.Title, "\n",
+							e.URL, "\n",
+							"#インフラ勉強会",
+						}, ""),
+					)
 					// today's summary
 					d = time.Now()
 					if e.StartDate.Before(dayLine) {
 						s.append(e,
 							time.Date(d.Year(), d.Month(), d.Day(), conf.SummaryPostHour, 0, 0, 0, jst),
 							strings.Join([]string{
-								"-- This is test post --\n",
 								"今日(", d.In(jst).Format("01/02"), ")の #インフラ勉強会 は...\n",
 								e.Title, "\n",
 								e.StartDate.In(jst).Format("15:04"), " - ", e.EndDate.In(jst).Format("15:04"), "\n",
@@ -147,8 +144,7 @@ func _main(ctx context.Context) (string, error) {
 						s.append(e,
 							nextPostHour,
 							strings.Join([]string{
-								"-- This is test post --\n",
-								"#インフラ勉強会 、次回", d.In(jst).Format("01/02"), "は...\n",
+								"#インフラ勉強会 、次回(", d.In(jst).Format("01/02"), ")は...\n",
 								e.Title, "\n",
 								e.StartDate.In(jst).Format("15:04"), " - ", e.EndDate.In(jst).Format("15:04"), "\n",
 								e.URL,
