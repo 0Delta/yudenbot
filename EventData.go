@@ -16,7 +16,7 @@ type rawEventDatas struct {
 
 type rawEventData struct {
 	ID           int         `json:"id"`
-	URL          string      `json:"global_id"`
+	URL          string      `json:"url"`
 	Title        string      `json:"title"`
 	Description  string      `json:"description"`
 	StartDateStr string      `json:"utc_start_date"`
@@ -40,7 +40,7 @@ type EventData struct {
 	Organizer   string
 }
 
-func GetEventsFromWordpress(url string,dayLineHour int) (events []EventData, err error) {
+func GetEventsFromWordpress(url string, dayLineHour int) (events []EventData, err error) {
 	nowt := time.Now()
 	nowt = time.Date(nowt.Year(), nowt.Month(), nowt.Day(), dayLineHour, 0, 0, 0, jst)
 	sdt := nowt.Format("2006/01/02T15:04")
